@@ -1,0 +1,335 @@
+--------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Development economics\Assignments\Replication\Logs\Figure1_CapitalA
+> ssistance.txt
+  log type:  text
+ opened on:  15 Feb 2026, 06:56:58
+r; t=0.06 6:56:58
+
+. 
+. cd "$root\Do Files"
+C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Development economics\Assignments\Replication\Do Files
+r; t=0.00 6:56:58
+
+. 
+. do 03_Main_Figures.do
+
+. /*******************************************************************************
+> *LAST EDITED: 06/30/2022
+> *CONTRIBUTORS: BC, MEK & AO
+> *PROJECT: Is It Who You Are or What You Get? Comparing the Impacts of Loans 
+>                   and Grants for Microenterprise Development
+> *JOURNAL: American Economic Journal-Applied Economics
+> *DESCRIPTION: This program builds all in-text Figures
+> *******************************************************************************/
+. ***Set up 
+.         clear all
+r; t=0.09 6:56:58
+
+.         set rmsg on
+r; t=0.00 6:56:58
+
+.         set seed 12345
+r; t=0.00 6:56:58
+
+.         set maxvar 32767  // Modify if not StataMP 
+
+r; t=0.02 6:56:58
+
+.         set max_memory . // (.) operating system is willing to supply all memory
+r; t=0.00 6:56:58
+
+.         set more off
+r; t=0.00 6:56:58
+
+.         set matsize 10000
+set matsize ignored.
+    Matrix sizes are no longer limited by c(matsize) in modern Statas.  Matrix sizes are now limited by edition of Stata.  See 
+    limits for more details.
+r; t=0.00 6:56:58
+
+.         set scheme s2color
+r; t=0.00 6:56:58
+
+.         grstyle init
+r; t=0.03 6:56:58
+
+.         grstyle set plain, horizontal grid
+r; t=0.01 6:56:58
+
+. ***Directories
+.         *Root 
+.                 *global root "c\tmp\" // Include and update this line if you're running this do file individually and not through "0
+> 0_SetUp.do"
+.         *Analysis data
+.                 global adata "$root\Data"
+r; t=0.00 6:56:58
+
+.         *Save figures
+.                 global figs "$root\Output\Figures"
+r; t=0.00 6:56:58
+
+. ********************************************************************************
+. 
+.                         ***********************************************************
+.                         ***********************************************************
+.                                                       ***Figures in text***
+.                         ***********************************************************
+.                         ***********************************************************
+. /*
+> INPUT: This program requires 3 datasets 
+>         1) AEJ_CKO_baseline_edited.dta
+>         2) AEJ_CKO_endline_edited.dta
+> OUTPUT: The program generates Figure 1 & Figure 2 in paper 
+> */                      
+.         
+.         
+. ******************************************************
+. ***Figure 1. Capital Assistance Received Men and Women 
+. ******************************************************
+. *For Women 
+.         *Call & prepare data
+.         use "$adata\AEJ_CKO_baseline_edited.dta",clear 
+r; t=0.01 6:56:58
+
+.         *For Women 
+.                 keep if b_baseline_gender==0
+(1,360 observations deleted)
+r; t=0.00 6:56:58
+
+.                 gen treatment=b_treatment_status
+r; t=0.00 6:56:58
+
+.                 gen amount_received_corrected=b_amount_received_corrected
+r; t=0.00 6:56:58
+
+.         *Drop controls
+.                 drop if treatment==0
+(615 observations deleted)
+r; t=0.00 6:56:58
+
+.         *Vars of interest: amount_received_corrected 
+.                 gen amount_bin=.
+(1,318 missing values generated)
+r; t=0.00 6:56:58
+
+.                 replace amount_bin=1 if amount_received_corrected==0
+(81 real changes made)
+r; t=0.00 6:56:58
+
+.                 replace amount_bin=2 if amount_received_corrected>0 & amount_received_corrected<1750
+(50 real changes made)
+r; t=0.00 6:56:58
+
+.                 replace amount_bin=3 if amount_received_corrected>=1750 & amount_received_corrected<2250
+(524 real changes made)
+r; t=0.00 6:56:58
+
+.                 replace amount_bin=4 if amount_received_corrected>=2250 & amount_received_corrected<=2750
+(371 real changes made)
+r; t=0.00 6:56:58
+
+.                 replace amount_bin=5 if amount_received_corrected>2750 
+(292 real changes made)
+r; t=0.00 6:56:58
+
+.         *Count 
+.                 gen n=1
+r; t=0.00 6:56:58
+
+.                 bys treatment: egen total_treatment=total(n)
+r; t=0.08 6:56:58
+
+.                 bys treatment amount_bin: egen total_treatment_bin=total(n)
+r; t=0.01 6:56:58
+
+.                 gen percent=(total_treatment_bin/total_treatment)*100
+r; t=0.00 6:56:58
+
+.                 keep treatment amount_bin percent 
+r; t=0.00 6:56:58
+
+.                 duplicates drop 
+
+Duplicates in terms of all variables
+
+(1,303 observations deleted)
+r; t=0.05 6:56:58
+
+.         *Figure 
+.                 sort treatment amount_bin
+r; t=0.00 6:56:58
+
+.                 gen order=_n
+r; t=0.00 6:56:58
+
+.                 replace order=order+1 if treatment==2
+(5 real changes made)
+r; t=0.00 6:56:58
+
+.                 replace order=order+2 if treatment==3
+(5 real changes made)
+r; t=0.00 6:56:58
+
+.         
+.                 twoway (bar percent order if amount_bin==1, color(navy) barw(.9)) ///
+>                 (bar percent order if amount_bin==2, color(navy%80) barw(.9)) ///
+>                 (bar percent order if amount_bin==3, color(navy%50) barw(.9)) /// 
+>                 (bar percent order if amount_bin==4, barw(.9)) ///
+>                 (bar percent order if amount_bin==5, barw(.9)), ///
+>                 ytitle("Proportion of loans/grants") ///
+>                 yscale(titlegap(*5)) xtitle("") ///
+>                 xlabel(3 "Microcredit" 9 "In Kind Grant" 15 "Cash Grant") ///
+>                 leg(r(1) order(1 "0" 2 "<1750" 3 "1750-2250" 4 "2250-2750" 5 ">2750") ///
+>                 symysize(*.8)  symxsize(*.5) region(lc(white)) size(small))
+r; t=17.87 6:57:16
+
+.                 graph export "$figs\Main_Figures\Graph_CA_female.png", replace width(800)
+file C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Developmenet
+    economics\Assignments\Replication\Output\Figures\Main_Figures\Graph_CA_female.png saved as PNG format
+r; t=0.35 6:57:17
+
+.                 
+. *For Men 
+.         *Call & prepare data
+.         use "$adata\AEJ_CKO_baseline_edited.dta",clear 
+r; t=0.01 6:57:17
+
+.         *For Men 
+.                 keep if b_baseline_gender==1
+(1,990 observations deleted)
+r; t=0.00 6:57:17
+
+.                 gen treatment=b_treatment_status
+r; t=0.00 6:57:17
+
+.                 gen amount_received_corrected=b_amount_received_corrected
+r; t=0.00 6:57:17
+
+.         *Drop controls
+.                 drop if treatment==0
+(405 observations deleted)
+r; t=0.00 6:57:17
+
+.         *Vars of interest: amount_received_corrected 
+.                 gen amount_bin=.
+(898 missing values generated)
+r; t=0.00 6:57:17
+
+.                 replace amount_bin=1 if amount_received_corrected==0
+(67 real changes made)
+r; t=0.00 6:57:17
+
+.                 replace amount_bin=2 if amount_received_corrected>0 & amount_received_corrected<1750
+(29 real changes made)
+r; t=0.00 6:57:17
+
+.                 replace amount_bin=3 if amount_received_corrected>=1750 & amount_received_corrected<2250
+(316 real changes made)
+r; t=0.00 6:57:17
+
+.                 replace amount_bin=4 if amount_received_corrected>=2250 & amount_received_corrected<=2750
+(282 real changes made)
+r; t=0.00 6:57:17
+
+.                 replace amount_bin=5 if amount_received_corrected>2750 
+(204 real changes made)
+r; t=0.00 6:57:17
+
+.         *Count 
+.                 gen n=1
+r; t=0.00 6:57:17
+
+.                 bys treatment: egen total_treatment=total(n)
+r; t=0.00 6:57:17
+
+.                 bys treatment amount_bin: egen total_treatment_bin=total(n)
+r; t=0.00 6:57:17
+
+.                 gen percent=(total_treatment_bin/total_treatment)*100
+r; t=0.00 6:57:17
+
+.                 keep treatment amount_bin percent 
+r; t=0.00 6:57:17
+
+.                 duplicates drop 
+
+Duplicates in terms of all variables
+
+(883 observations deleted)
+r; t=0.01 6:57:17
+
+.         *Figure 
+.                 sort treatment amount_bin
+r; t=0.00 6:57:17
+
+.                 gen order=_n
+r; t=0.00 6:57:17
+
+.                 replace order=order+1 if treatment==2
+(5 real changes made)
+r; t=0.00 6:57:17
+
+.                 replace order=order+2 if treatment==3
+(5 real changes made)
+r; t=0.00 6:57:17
+
+.         
+.                 twoway (bar percent order if amount_bin==1, color(navy) barw(.9)) ///
+>                 (bar percent order if amount_bin==2, color(navy%80) barw(.9)) ///
+>                 (bar percent order if amount_bin==3, color(navy%50) barw(.9)) /// 
+>                 (bar percent order if amount_bin==4, barw(.9)) ///
+>                 (bar percent order if amount_bin==5, barw(.9)), ///
+>                 ytitle("Proportion of loans/grants") ///
+>                 yscale(titlegap(*5)) xtitle("") ///
+>                 xlabel(3 "Microcredit" 9 "In Kind Grant" 15 "Cash Grant") ///
+>                 leg(r(1) order(1 "0" 2 "<1750" 3 "1750-2250" 4 "2250-2750" 5 ">2750") ///
+>                 symysize(*.8)  symxsize(*.5) region(lc(white)) size(small))
+r; t=2.32 6:57:19
+
+.                 graph export "$figs\Main_Figures\Graph_CA_male.png", replace width(800)
+file C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Developmenet
+    economics\Assignments\Replication\Output\Figures\Main_Figures\Graph_CA_male.png saved as PNG format
+r; t=0.29 6:57:19
+
+.                 
+. 
+. ********************************************************
+. ***Figure 2. Quantile Treatment Effects for Total Income
+. ********************************************************
+. 
+. ***FOR MEN 
+.         *Call data
+.                 use "$adata\AEJ_CKO_endline_edited.dta",clear 
+r; t=0.04 6:57:19
+
+.                 *Quantile Regressions 
+.                         ivqte labor_income (Loan) if treatment!=2 &  treatment!=3 & male==1, ///
+>                         quantiles(0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 0.975) ///
+>                         variance unordered(b_round)
+command ivqte is unrecognized
+r(199); t=0.00 6:57:19
+
+end of do-file
+
+r(199); t=21.28 6:57:19
+
+. 
+. cd "$root\Output\Figures\Main_Figures"
+C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Development economics\Assignments\Replication\Output\Figures\Main_Figures
+r; t=0.00 6:57:20
+
+. 
+. dir Graph_CA*
+  30.6k   2/15/26  6:57  Graph_CA_female.png
+  30.8k   2/15/26  6:57  Graph_CA_male.png 
+r; t=0.00 6:57:20
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\Martin Muriungi\OneDrive\Documents\Lectures\Development economics\Assignments\Replication\Logs\Figure1_CapitalA
+> ssistance.txt
+  log type:  text
+ closed on:  15 Feb 2026, 06:57:20
+--------------------------------------------------------------------------------------------------------------------------------------
